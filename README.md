@@ -17,11 +17,11 @@ A desktop To-Do list application built with Tauri, Svelte, and Rust for fast, lo
 ---
 
 ## 🚀 Tech Stack
-- **Frontend**: Svelte, TailwindCSS
-- **Backend**: Rust (Tauri commands)
-- **Build & Packaging**: Vite, Tauri
-- **Version Control**: Git, GitHub
-- **Distribution**: Windows, macOS, and Linux binaries via Tauri
+- **Frontend**: <img src="https://img.shields.io/badge/Svelte-FF3E00?style=flat-square&logo=Svelte&logoColor=white"/>, TailwindCSS
+- **Backend**: <img src="https://img.shields.io/badge/Rust-000000?style=flat-square&logo=Rust&logoColor=white"/> (Tauri commands)
+- **Build & Packaging**: Vite, <img src="https://img.shields.io/badge/Tauri-24C8D8?style=flat&logo=Tauri&logoColor=white"/>
+- **Version Control**: <img src="https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white"/>, GitHub
+- **Distribution**: Windows, macOS, and <img src="https://img.shields.io/badge/Vim-019733?style=flat-square&logo=Vim&logoColor=white"/> binaries via Tauri
 
 ---
 
@@ -61,9 +61,9 @@ A desktop To-Do list application built with Tauri, Svelte, and Rust for fast, lo
 
 2. Follow Conventional Commits for commit messages:
     ```sql
-    feat: add drag-and-drop reordering
-    fix: correct timestamp formatting
-    docs: update README installation instructions
+    Feat: add drag-and-drop reordering
+    Fix: correct timestamp formatting
+    Docs: update README installation instructions
     ```
 
 3. Open a Pull Request with a summary of your changes and any screenshots or examples.
