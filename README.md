@@ -1,4 +1,4 @@
-# 📝 Todori
+# 📝 ToDori
 
 A desktop To-Do list application built with Tauri, Svelte, and Rust for fast, local file–based task management.
 
@@ -10,7 +10,7 @@ A desktop To-Do list application built with Tauri, Svelte, and Rust for fast, lo
 - **Core Functionality**
   - Create, read, update, and delete tasks
   - Nested sub-items (sub-tasks)
-  - Timestamped completion records
+  - (To be Impl) Timestamped completion records
   - Drag-and-drop reordering
   - Save/load data as JSON or Markdown
 
