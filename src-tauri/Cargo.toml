@@ -30,5 +30,5 @@ serde_json = "1"
 tag-prefix = "v"               
 allow-branch = ["main"]       
 pre-release-hook = [
-  "cd .. && npm version ${level} --no-git-tag-version"
+  "sh -c 'cd .. && npm version ${level} --no-git-tag-version'"
 ]
