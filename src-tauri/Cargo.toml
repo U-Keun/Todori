@@ -1,6 +1,6 @@
 [package]
 name = "todori"
-version = "0.1.1"
+version = "0.1.2"
 description = "A Tauri App"
 authors = ["U-Keun"]
 edition = "2021"
