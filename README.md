@@ -65,9 +65,9 @@ A desktop To-Do list application built with Tauri, Svelte, and Rust for fast, lo
 
 2. Follow Conventional Commits for commit messages:
     ```sql
-    Feat: add drag-and-drop reordering
-    Fix: correct timestamp formatting
-    Docs: update README installation instructions
+    feat: add drag-and-drop reordering
+    fix: correct timestamp formatting
+    docs: update README installation instructions
     ```
 
 3. Open a Pull Request with a summary of your changes and any screenshots or examples.
