@@ -14,3 +14,8 @@ vite.config.ts.timestamp-*
 *.rs.bk
 
 .DS_Store
+
+# Vim swap files
+*.swp
+*.swo
+.*.sw?
