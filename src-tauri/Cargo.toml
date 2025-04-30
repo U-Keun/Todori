@@ -4,6 +4,9 @@ version = "0.1.1"
 description = "A Tauri App"
 authors = ["U-Keun"]
 edition = "2021"
+license = "MIT"      
+repository = "https://github.com/U-Keun/ToDori"
+homepage = "https://github.com/U-Keun/Todori"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
