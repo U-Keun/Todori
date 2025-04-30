@@ -1,11 +1,12 @@
 import { writable } from 'svelte/store';
 
-export type Todo = {
+export interface Todo {
     id: string;
     text: string;
     done: boolean;
     order: number;
     subTodos?: Todo[];
+    isOpen?: boolean;
 };
 
 function createTodoStore() {
@@ -24,6 +25,10 @@ function createTodoStore() {
                 const newItem: Todo = { id: crypto.randomUUID(), text, done: false, order: t.length };
                 return groupByDone([...t, newItem]);
             }),
+        setIsOpen: (id: string, isOpen: boolean) =>
+            update(todos => todos.map(todo =>
+                                      todo.id === id ? { ...todo, isOpen } : todo
+            )),
         addSubTodo: (parentId: string, text: string) => 
             update(t => {
                 return t.map(todo => {

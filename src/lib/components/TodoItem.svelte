@@ -10,7 +10,9 @@
 
     let localDone = todo.done;
     let subTodoText = "";
-    let subVisible = false;
+
+    $: subVisible = todo.isOpen ?? false;
+    // let subVisible = false;
 
     let isEditing = false;
     let editText = todo.text;
@@ -40,6 +42,10 @@
                 : dispatch('edit', { id: todo.id, text: editText.trim() });
         }
         isEditing = false;
+    }
+
+    function toggleSubVisible() {
+        todos.setIsOpen(todo.id, !subVisible);
     }
 
     function startEditSub(subId: string, text: string) {
@@ -95,7 +101,7 @@
 <div class="flex flex-col gap-1">
     <div class="flex items-center justify-between gap-3 rounded-xl bg-white dark:bg-white px-3 py-2 shadow font-sans text-gray-500">
         <div class="flex items-center gap-2">
-            <button title="toggle sub-todo" on:click={() => subVisible = !subVisible}
+            <button title="toggle sub-todo" on:click={toggleSubVisible}
                     class="w-6 h-6 rounded border text-xs grid place-content-center hover:bg-gray-200">
                     {subVisible ? '▾' : '▸'}
             </button>
