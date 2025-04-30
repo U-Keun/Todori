@@ -1,8 +1,6 @@
 <script lang="ts">
     import { todos, type Todo } from '$lib/stores/todos';
-    import { fade, slide } from 'svelte/transition';
-    import { createEventDispatcher, tick } from 'svelte';
-    import { clickOutside } from '$lib/actions/clickOutside';
+    import { createEventDispatcher } from 'svelte';
     import { ProgressBar, AddSubButton, DropdownMenu, InlineEditor } from '$lib/components';
     import { makeMenuItems } from '$lib/helpers/menus';
 
@@ -21,7 +19,7 @@
 
     const dispatch = createEventDispatcher();
 
-    function toggle() {
+    function toggleDone() {
         todos.toggle(todo.id);
         localDone = !localDone;
     }
@@ -29,9 +27,6 @@
     function startEdit() {
         editText = todo.text;
         isEditing = true;
-        tick().then(() => {
-            document.getElementById(`edit-${todo.id}`)?.focus();
-        });
     }
 
     function confirmEdit() {
@@ -48,17 +43,13 @@
         editText = todo.text;
     }
 
-    function toggleSubVisible() {
+    function toggleOpen() {
         todos.setIsOpen(todo.id, !subVisible);
     }
 
     function startEditSub(subId: string, text: string) {
         subEditText = text;
         subEditingId = subId;
-        showSubMenuId = null;
-        tick().then(() => {
-            document.getElementById(`edit-sub-${subId}`)?.focus();
-        });
     }
 
     function confirmEditSub(subId: string) {
@@ -84,13 +75,11 @@
 
     const remove = () => todos.remove(todo.id);
 
-    $: progress = (() => {
-        if (localDone) return 100;
-
-        const total = Math.max(1, todo.subTodos ? todo.subTodos.length : 0);
-        const done = todo.subTodos ? todo.subTodos.filter(sub => sub.done).length : 0;
-        return (done / total) * 100;
-    })();
+    $: progress = localDone
+        ? 100
+        : ((todo.subTodos?.filter(s => s.done).length ?? 0)
+            / Math.max(1, todo.subTodos?.length ?? 0))
+            * 100;
 
     function collapse(node: HTMLElement, { duration = 250 } = {}) {
         const height = node.scrollHeight;
@@ -110,7 +99,7 @@
 <div class="flex flex-col gap-1">
     <div class="flex items-center justify-between gap-3 rounded-xl bg-white dark:bg-white px-3 py-2 shadow font-sans text-gray-500">
         <div class="flex items-center gap-2">
-            <button title="toggle sub-todo" on:click={toggleSubVisible}
+            <button title="toggle sub-todo" on:click={toggleOpen}
                     class="w-6 h-6 rounded border text-xs grid place-content-center hover:bg-gray-200">
                     {subVisible ? '▾' : '▸'}
             </button>
@@ -122,7 +111,7 @@
                     on:cancel={cancelEdit}
                 />
             {:else}
-                <span class="{localDone ? 'line-through text-zinc-400': ''}">
+                <span class:line-through={localDone} class:text-zinc-400={localDone}>
                     {todo.text}
                 </span>    
             {/if}
@@ -131,8 +120,9 @@
         <div class="flex items-center gap-2">
             <ProgressBar {progress} done={localDone} />
 
-            <button title="done" on:click={toggle}
-                class="w-7 h-7 rounded-full border grid place-content-center hover:bg-yellow-300 hover:text-white {localDone && 'bg-yellow-200 text-white'}">
+            <button title="done" on:click={toggleDone} 
+                    class:bg-yellow-200={localDone} class:text-white={localDone}
+                    class="w-7 h-7 rounded-full border grid place-content-center hover:bg-yellow-300 hover:text-white">
                 ✔
             </button>
             <DropdownMenu items={mainMenuItems} />
@@ -154,14 +144,13 @@
                                 on:cancel={cancelEditSub}
                             />
                         {:else}
-                            <span  class="text-sm {sub.done ? 'line-through text-zinc-400' : '' }">{sub.text}</span>
+                            <span class="text-sm" class:line-through={sub.done} class:text-zinc-400={sub.done}>{sub.text}</span>
                         {/if}
                             
                         <div class="flex items-center gap-2">
-                            <button title="toggle sub-todo"
-                                    on:click={ () => todos.toggle(sub.id) }
-                                    class="w-6 h-6 rounded border text-xs grid place-content-center hover:bg-yellow-300 hover:text-white
-                                    {sub.done ? 'bg-yellow-200 text-white' : 'text-gray-400'}">
+                            <button title="toggle sub-todo" on:click={ () => todos.toggle(sub.id) } 
+                                    class:bg-yellow-200={sub.done} class:text-white={sub.done} class:text-gray-400={!sub.done}
+                                    class="w-6 h-6 rounded border text-xs grid place-content-center hover:bg-yellow-300 hover:text-white">
                                     ✔
                             </button>
                             <DropdownMenu items={makeMenuItems(
