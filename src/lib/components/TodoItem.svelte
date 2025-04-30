@@ -1,6 +1,6 @@
 <script lang="ts">
     import { todos, type Todo } from '$lib/stores/todos';
-    import { fade } from 'svelte/transition';
+    import { fade, slide } from 'svelte/transition';
     import { createEventDispatcher, tick } from 'svelte';
     import { clickOutside } from '$lib/actions/clickOutside';
     import { ProgressBar, AddSubButton, DropdownMenu } from '$lib/components';
@@ -12,7 +12,6 @@
     let subTodoText = "";
 
     $: subVisible = todo.isOpen ?? false;
-    // let subVisible = false;
 
     let isEditing = false;
     let editText = todo.text;
@@ -44,6 +43,11 @@
         isEditing = false;
     }
 
+    function cancelEdit() {
+        isEditing = false;
+        editText = todo.text;
+    }
+
     function toggleSubVisible() {
         todos.setIsOpen(todo.id, !subVisible);
     }
@@ -66,6 +70,11 @@
         subEditingId = null;
     }
 
+    function cancelEditSub() {
+        subEditingId = null;
+        subEditText = "";
+    }
+
     function addSubTodo() {
         if (subTodoText.trim()) {
             todos.addSubTodo(todo.id, subTodoText);
@@ -83,13 +92,13 @@
         return (done / total) * 100;
     })();
 
-    function collapse(node: HTMLElement, { duration = 300 } = {}) {
-        const height = getComputedStyle(node).height;
+    function collapse(node: HTMLElement, { duration = 250 } = {}) {
+        const height = node.scrollHeight;
         return {
             duration,
             css: (t: number) => `
                 overflow: hidden;
-                height: ${t * parseFloat(height)}px;
+                height: ${t * height}px;
                 opacity: ${t}
             `
         };
@@ -112,7 +121,10 @@
                     type="text"
                     bind:value={editText}
                     class="border rounded px-2 py-1 text-sm w-full"
-                    on:keydown={(e) => e.key === 'Enter' && confirmEdit()}
+                    on:keydown={(e) => {
+                        if (e.key === 'Enter') confirmEdit();
+                        if (e.key === 'Escape') cancelEdit();
+                    }}
                     on:blur={confirmEdit}
                 />
             {:else}
@@ -134,20 +146,23 @@
     </div>
 
     {#if subVisible}
-        <div class="relative pl-10 mt-2">
+        <div class="relative pl-10 mt-2" 
+             transition:collapse={{ duration: 200 }}>
             <div class="absolute top-0 left-6 w-px bg-gray-300 h-full"></div>
 
-            <div class="flex flex-col gap-1.5" transition:collapse={{ duration: 200 }}>
+            <div class="flex flex-col gap-1.5">
                 {#each todo.subTodos as sub (sub.id)}
-                    <div class="flex items-center justify-between gap-2 rounded-xl bg-white dark:bg-white px-3 py-0.5 shadow font-sans text-gray-500"
-                         transition:collapse={{ duration: 100 }}>
+                    <div class="flex items-center justify-between gap-2 rounded-xl bg-white dark:bg-white px-3 py-0.5 shadow font-sans text-gray-500">
                         {#if subEditingId === sub.id}
                             <input
                                 id={"edit-sub-" + sub.id}
                                 type="text"
                                 bind:value={subEditText}
                                 class="w-full min-w-0 border rounded px-2 py-0.5 text-sm"
-                                on:keydown={(e) => e.key === 'Enter' && confirmEditSub(sub.id)}
+                                on:keydown={(e) => {
+                                    if (e.key === 'Enter') confirmEditSub(sub.id);
+                                    if (e.key === 'Escape') cancelEditSub();
+                                }}
                                 on:blur={() => confirmEditSub(sub.id)}
                             />
                         {:else}
@@ -171,7 +186,7 @@
                 {/each}
             </div>
 
-            <div class="relative h-10" transition:collapse={{ duration: 90 }}>
+            <div class="relative h-10">
                 <div class="absolute inset-0 flex items-center">
                     <AddSubButton
                         on:add={addSubTodo}
