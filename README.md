@@ -17,11 +17,11 @@ A desktop To-Do list application built with Tauri, Svelte, and Rust for fast, lo
 ---
 
 ## 🚀 Tech Stack
-- **Frontend**: <img src="https://img.shields.io/badge/Svelte-FF3E00?style=flat-square&logo=Svelte&logoColor=white"/>, TailwindCSS
+- **Frontend**: <img src="https://img.shields.io/badge/Svelte-FF3E00?style=flat-square&logo=Svelte&logoColor=white"/>, <img src="https://img.shields.io/badge/tailwind%20css-%2338B2AC.svg?&style=flat-square&logo=tailwind%20css&logoColor=white" />
 - **Backend**: <img src="https://img.shields.io/badge/Rust-000000?style=flat-square&logo=Rust&logoColor=white"/> (Tauri commands)
 - **Build & Packaging**: Vite, <img src="https://img.shields.io/badge/Tauri-24C8D8?style=flat&logo=Tauri&logoColor=white"/>
-- **Version Control**: <img src="https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white"/>, GitHub
-- **Distribution**: Windows, macOS, and <img src="https://img.shields.io/badge/Vim-019733?style=flat-square&logo=Vim&logoColor=white"/> binaries via Tauri
+- **Version Control**: <img src="https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white"/>, <img src="https://img.shields.io/badge/github-%23181717.svg?&style=flat-square&logo=github&logoColor=white" />
+- **Distribution**: <img src="https://img.shields.io/badge/windows-%230078D6.svg?&style=flat-square&logo=windows&logoColor=white" />, <img src="https://img.shields.io/badge/macos-%23000000.svg?&style=flat-square&logo=macos&logoColor=white" />, and <img src="https://img.shields.io/badge/linux-%23FCC624.svg?&style=flat-square&logo=linux&logoColor=black" /> binaries via Tauri
 
 ---
 
