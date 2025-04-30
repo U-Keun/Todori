@@ -1,4 +1,4 @@
-# 📝 MyTodoApp
+# 📝 Todori
 
 A desktop To-Do list application built with Tauri, Svelte, and Rust for fast, local file–based task management.
 
@@ -19,17 +19,17 @@ A desktop To-Do list application built with Tauri, Svelte, and Rust for fast, lo
 ## 🚀 Tech Stack
 - **Frontend**: <img src="https://img.shields.io/badge/Svelte-FF3E00?style=flat-square&logo=Svelte&logoColor=white"/>, <img src="https://img.shields.io/badge/tailwind%20css-%2338B2AC.svg?&style=flat-square&logo=tailwind%20css&logoColor=white" />
 - **Backend**: <img src="https://img.shields.io/badge/Rust-000000?style=flat-square&logo=Rust&logoColor=white"/> (Tauri commands)
-- **Build & Packaging**: Vite, <img src="https://img.shields.io/badge/Tauri-24C8D8?style=flat&logo=Tauri&logoColor=white"/>
+- **Build & Packaging**: <img src="https://img.shields.io/badge/Vite-646CFF?style=flat&logo=Vite&logoColor=white"/>, <img src="https://img.shields.io/badge/Tauri-24C8D8?style=flat&logo=Tauri&logoColor=white"/>
 - **Version Control**: <img src="https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white"/>, <img src="https://img.shields.io/badge/github-%23181717.svg?&style=flat-square&logo=github&logoColor=white" />
-- **Distribution**: <img src="https://img.shields.io/badge/windows-%230078D6.svg?&style=flat-square&logo=windows&logoColor=white" />, <img src="https://img.shields.io/badge/macos-%23000000.svg?&style=flat-square&logo=macos&logoColor=white" />, and <img src="https://img.shields.io/badge/linux-%23FCC624.svg?&style=flat-square&logo=linux&logoColor=black" /> binaries via Tauri
+- **Distribution**: <img src="https://img.shields.io/badge/windows-%230078D6.svg?&style=flat-square&logo=windows&logoColor=white" />, <img src="https://img.shields.io/badge/macos-%23000000.svg?&style=flat-square&logo=macos&logoColor=white" />, and <img src="https://img.shields.io/badge/Linux-%23FCC624.svg?&style=flat-square&logo=Linux&logoColor=black" /> binaries via Tauri
 
 ---
 
 ## ⚙️ Installation & Usage
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/your-username/my-todo-app.git
-   cd my-todo-app
+   git clone https://github.com/U-Keun/todo-Tauri.git
+   cd todo-Tauri
    ```
 
 2. Install dependencies
@@ -46,6 +46,10 @@ A desktop To-Do list application built with Tauri, Svelte, and Rust for fast, lo
     ```
 
 💡 Quick Start
+<p align="center">
+  <img width="500" alt="스크린샷 2025-04-30 오전 10 33 12" src="https://github.com/user-attachments/assets/ea521dd7-fa4a-40a7-b06f-d8a98833f51f" />
+</p>
+
 1. Launch the app to view your current task list.
 
 2. Click “Add Task” in the toolbar to create a new item.
