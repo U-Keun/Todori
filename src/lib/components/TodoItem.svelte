@@ -3,7 +3,7 @@
     import { fade, slide } from 'svelte/transition';
     import { createEventDispatcher, tick } from 'svelte';
     import { clickOutside } from '$lib/actions/clickOutside';
-    import { ProgressBar, AddSubButton, DropdownMenu } from '$lib/components';
+    import { ProgressBar, AddSubButton, DropdownMenu, InlineEditor } from '$lib/components';
     import { makeMenuItems } from '$lib/helpers/menus';
 
     export let todo: Todo;
@@ -116,16 +116,10 @@
             </button>
 
             {#if isEditing}
-                <input
-                    id={"edit-" + todo.id}
-                    type="text"
-                    bind:value={editText}
-                    class="border rounded px-2 py-1 text-sm w-full"
-                    on:keydown={(e) => {
-                        if (e.key === 'Enter') confirmEdit();
-                        if (e.key === 'Escape') cancelEdit();
-                    }}
-                    on:blur={confirmEdit}
+                <InlineEditor
+                    initial={todo.text}
+                    on:confirm={(e) => { editText = e.detail; confirmEdit(); }}
+                    on:cancel={cancelEdit}
                 />
             {:else}
                 <span class="{localDone ? 'line-through text-zinc-400': ''}">
@@ -154,16 +148,10 @@
                 {#each todo.subTodos as sub (sub.id)}
                     <div class="flex items-center justify-between gap-2 rounded-xl bg-white dark:bg-white px-3 py-0.5 shadow font-sans text-gray-500">
                         {#if subEditingId === sub.id}
-                            <input
-                                id={"edit-sub-" + sub.id}
-                                type="text"
-                                bind:value={subEditText}
-                                class="w-full min-w-0 border rounded px-2 py-0.5 text-sm"
-                                on:keydown={(e) => {
-                                    if (e.key === 'Enter') confirmEditSub(sub.id);
-                                    if (e.key === 'Escape') cancelEditSub();
-                                }}
-                                on:blur={() => confirmEditSub(sub.id)}
+                            <InlineEditor
+                                initial={sub.text}
+                                on:confirm={(e) => confirmEditSub(sub.id, e.detail)}
+                                on:cancel={cancelEditSub}
                             />
                         {:else}
                             <span  class="text-sm {sub.done ? 'line-through text-zinc-400' : '' }">{sub.text}</span>
