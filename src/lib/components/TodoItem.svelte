@@ -1,0 +1,183 @@
+<script lang="ts">
+    import { todos, type Todo } from '$lib/stores/todos';
+    import { fade } from 'svelte/transition';
+    import { createEventDispatcher, tick } from 'svelte';
+    import { clickOutside } from '$lib/actions/clickOutside';
+    import { ProgressBar, AddSubButton, DropdownMenu } from '$lib/components';
+    import { makeMenuItems } from '$lib/helpers/menus';
+
+    export let todo: Todo;
+
+    let localDone = todo.done;
+    let subTodoText = "";
+    let subVisible = false;
+
+    let isEditing = false;
+    let editText = todo.text;
+
+    let subEditingId: string | null = null;
+    let subEditText = "";
+
+    const dispatch = createEventDispatcher();
+
+    function toggle() {
+        todos.toggle(todo.id);
+        localDone = !localDone;
+    }
+
+    function startEdit() {
+        editText = todo.text;
+        isEditing = true;
+        tick().then(() => {
+            document.getElementById(`edit-${todo.id}`)?.focus();
+        });
+    }
+
+    function confirmEdit() {
+        if (editText.trim()) {
+            todos.updateText
+                ? todos.updateText(todo.id, editText.trim())
+                : dispatch('edit', { id: todo.id, text: editText.trim() });
+        }
+        isEditing = false;
+    }
+
+    function startEditSub(subId: string, text: string) {
+        subEditText = text;
+        subEditingId = subId;
+        showSubMenuId = null;
+        tick().then(() => {
+            document.getElementById(`edit-sub-${subId}`)?.focus();
+        });
+    }
+
+    function confirmEditSub(subId: string) {
+        if (subEditText.trim()) {
+            todos.updateSubText
+                ? todos.updateSubText(todo.id, subId, subEditText.trim())
+                : dispatch('editSub', { parentId: todo.id, subId, text: subEditText.trim() });
+        }
+        subEditingId = null;
+    }
+
+    function addSubTodo() {
+        if (subTodoText.trim()) {
+            todos.addSubTodo(todo.id, subTodoText);
+            subTodoText = "";
+        }
+    }
+
+    const remove = () => todos.remove(todo.id);
+
+    $: progress = (() => {
+        if (localDone) return 100;
+
+        const total = Math.max(1, todo.subTodos ? todo.subTodos.length : 0);
+        const done = todo.subTodos ? todo.subTodos.filter(sub => sub.done).length : 0;
+        return (done / total) * 100;
+    })();
+
+    function collapse(node: HTMLElement, { duration = 300 } = {}) {
+        const height = getComputedStyle(node).height;
+        return {
+            duration,
+            css: (t: number) => `
+                overflow: hidden;
+                height: ${t * parseFloat(height)}px;
+                opacity: ${t}
+            `
+        };
+    }
+
+    const mainMenuItems = makeMenuItems(startEdit, remove);
+</script>
+
+<div class="flex flex-col gap-1">
+    <div class="flex items-center justify-between gap-3 rounded-xl bg-white dark:bg-white px-3 py-2 shadow font-sans text-gray-500">
+        <div class="flex items-center gap-2">
+            <button title="toggle sub-todo" on:click={() => subVisible = !subVisible}
+                    class="w-6 h-6 rounded border text-xs grid place-content-center hover:bg-gray-200">
+                    {subVisible ? '▾' : '▸'}
+            </button>
+
+            {#if isEditing}
+                <input
+                    id={"edit-" + todo.id}
+                    type="text"
+                    bind:value={editText}
+                    class="border rounded px-2 py-1 text-sm w-full"
+                    on:keydown={(e) => e.key === 'Enter' && confirmEdit()}
+                    on:blur={confirmEdit}
+                />
+            {:else}
+                <span class="{localDone ? 'line-through text-zinc-400': ''}">
+                    {todo.text}
+                </span>    
+            {/if}
+        </div>
+        
+        <div class="flex items-center gap-2">
+            <ProgressBar {progress} done={localDone} />
+
+            <button title="done" on:click={toggle}
+                class="w-7 h-7 rounded-full border grid place-content-center hover:bg-yellow-300 hover:text-white {localDone && 'bg-yellow-200 text-white'}">
+                ✔
+            </button>
+            <DropdownMenu items={mainMenuItems} />
+        </div>
+    </div>
+
+    {#if subVisible}
+        <div class="relative pl-10 mt-2">
+            <div class="absolute top-0 left-6 w-px bg-gray-300 h-full"></div>
+
+            <div class="flex flex-col gap-1.5" transition:collapse={{ duration: 200 }}>
+                {#each todo.subTodos as sub (sub.id)}
+                    <div class="flex items-center justify-between gap-2 rounded-xl bg-white dark:bg-white px-3 py-0.5 shadow font-sans text-gray-500"
+                         transition:collapse={{ duration: 100 }}>
+                        {#if subEditingId === sub.id}
+                            <input
+                                id={"edit-sub-" + sub.id}
+                                type="text"
+                                bind:value={subEditText}
+                                class="w-full min-w-0 border rounded px-2 py-0.5 text-sm"
+                                on:keydown={(e) => e.key === 'Enter' && confirmEditSub(sub.id)}
+                                on:blur={() => confirmEditSub(sub.id)}
+                            />
+                        {:else}
+                            <span  class="text-sm {sub.done ? 'line-through text-zinc-400' : '' }">{sub.text}</span>
+                        {/if}
+                            
+                        <div class="flex items-center gap-2">
+                            <button title="toggle sub-todo"
+                                    on:click={ () => todos.toggle(sub.id) }
+                                    class="w-6 h-6 rounded border text-xs grid place-content-center hover:bg-yellow-300 hover:text-white
+                                    {sub.done ? 'bg-yellow-200 text-white' : 'text-gray-400'}">
+                                    ✔
+                            </button>
+                            <DropdownMenu items={makeMenuItems(
+                                          () => startEditSub(sub.id, sub.text),
+                                          () => todos.removeSubTodo(todo.id, sub.id)
+                                )} />
+                            
+                        </div>
+                    </div>
+                {/each}
+            </div>
+
+            <div class="relative h-10" transition:collapse={{ duration: 90 }}>
+                <div class="absolute inset-0 flex items-center">
+                    <AddSubButton
+                        on:add={addSubTodo}
+                        class="absolute left-2 top-1/2 -translate-y-1/2 z-10 shadow" />
+                    <input type="text"
+                           placeholder="new sub-ToDo"
+                           bind:value={subTodoText}
+                           class="w-full border-0 rounded-xl border text-xs pr-4 py-1.5 pl-9 bg-white dark:bg-white focus:outline-none shadow"
+                           on:keydown={ (e) => { if (e.key === 'Enter') addSubTodo(); }}
+                    />
+                </div>
+            </div>
+        </div>
+    {/if}
+</div>
