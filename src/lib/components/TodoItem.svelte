@@ -1,7 +1,7 @@
 <script lang="ts">
     import { todos, type Todo } from '$lib/stores/todos';
     import { createEventDispatcher } from 'svelte';
-    import { ProgressBar, AddSubButton, DropdownMenu, InlineEditor } from '$lib/components';
+    import { ProgressBar, AddSubButton, DropdownMenu, InlineEditor, SubItem } from '$lib/components';
     import { makeMenuItems } from '$lib/helpers/menus';
 
     export let todo: Todo;
@@ -136,30 +136,9 @@
 
             <div class="flex flex-col gap-1.5">
                 {#each todo.subTodos as sub (sub.id)}
-                    <div class="flex items-center justify-between gap-2 rounded-xl bg-white dark:bg-white px-3 py-0.5 shadow font-sans text-gray-500">
-                        {#if subEditingId === sub.id}
-                            <InlineEditor
-                                initial={sub.text}
-                                on:confirm={(e) => confirmEditSub(sub.id, e.detail)}
-                                on:cancel={cancelEditSub}
-                            />
-                        {:else}
-                            <span class="text-sm" class:line-through={sub.done} class:text-zinc-400={sub.done}>{sub.text}</span>
-                        {/if}
-                            
-                        <div class="flex items-center gap-2">
-                            <button title="toggle sub-todo" on:click={ () => todos.toggle(sub.id) } 
-                                    class:bg-yellow-200={sub.done} class:text-white={sub.done} class:text-gray-400={!sub.done}
-                                    class="w-6 h-6 rounded border text-xs grid place-content-center hover:bg-yellow-300 hover:text-white">
-                                    ✔
-                            </button>
-                            <DropdownMenu items={makeMenuItems(
-                                          () => startEditSub(sub.id, sub.text),
-                                          () => todos.removeSubTodo(todo.id, sub.id)
-                                )} />
-                            
-                        </div>
-                    </div>
+                    <SubItem {sub} {subEditingId} subEditText={subEditText} onStartEdit={startEditSub}
+                        onConfirm={confirmEditSub} onCancel={cancelEditSub}
+                        onToggle={(id) => todos.toggle(id)} onRemove={(id) => todos.removeSubTodo(todo.id, id)} />
                 {/each}
             </div>
 
