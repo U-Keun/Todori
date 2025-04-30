@@ -28,8 +28,8 @@ A desktop To-Do list application built with Tauri, Svelte, and Rust for fast, lo
 ## ⚙️ Installation & Usage
 1. **Clone the repo**
    ```bash
-   git clone https://github.com/U-Keun/Todori.git
-   cd Todori
+   git clone https://github.com/U-Keun/ToDori.git
+   cd ToDori
    ```
 
 2. Install dependencies
