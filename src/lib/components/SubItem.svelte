@@ -4,7 +4,6 @@
 
     export let sub;
     export let subEditingId;
-    export let subEditText;
     export let onConfirm;
     export let onCancel;
     export let onToggle;

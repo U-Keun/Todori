@@ -5,6 +5,7 @@
     export let onCancel: () => void;
 
     let value = initial;
+    let inputEl: HTMLInputElement;
     const dispatch = createEventDispatcher();
 
     function handleKeydown(e: KeyboardEvent) {
@@ -13,12 +14,12 @@
     }
 
     onMount(() => {
-        const input = document.querySelector('input');
-        input && (input as HTMLInputElement).focus();
+        inputEl?.focus();
     });
 </script>
 
 <input
+    bind:this={inputEl}
     bind:value
     class="border rounded px-2 py-1 text-sm w-full"
     on:keydown={handleKeydown}

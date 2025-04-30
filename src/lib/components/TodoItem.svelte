@@ -15,7 +15,6 @@
     let editText = todo.text;
 
     let subEditingId: string | null = null;
-    let subEditText = "";
 
     const dispatch = createEventDispatcher();
 
@@ -48,22 +47,20 @@
     }
 
     function startEditSub(subId: string, text: string) {
-        subEditText = text;
         subEditingId = subId;
     }
 
-    function confirmEditSub(subId: string) {
-        if (subEditText.trim()) {
+    function confirmEditSub(subId: string, newText: string) {
+        if (newText.trim()) {
             todos.updateSubText
-                ? todos.updateSubText(todo.id, subId, subEditText.trim())
-                : dispatch('editSub', { parentId: todo.id, subId, text: subEditText.trim() });
+                ? todos.updateSubText(todo.id, subId, newText.trim())
+                : dispatch('editSub', { parentId: todo.id, subId, text: newText.trim() });
         }
         subEditingId = null;
     }
 
     function cancelEditSub() {
         subEditingId = null;
-        subEditText = "";
     }
 
     function addSubTodo() {
@@ -136,7 +133,7 @@
 
             <div class="flex flex-col gap-1.5">
                 {#each todo.subTodos as sub (sub.id)}
-                    <SubItem {sub} {subEditingId} subEditText={subEditText} onStartEdit={startEditSub}
+                    <SubItem {sub} {subEditingId} onStartEdit={startEditSub}
                         onConfirm={confirmEditSub} onCancel={cancelEditSub}
                         onToggle={(id) => todos.toggle(id)} onRemove={(id) => todos.removeSubTodo(todo.id, id)} />
                 {/each}
