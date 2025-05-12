@@ -5,27 +5,18 @@ use tauri::{ State, Manager };
 
 #[derive(Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
-struct Todo {
-    id: String,
-    text: String,
-    done: bool,
-    order: u32,
-    sub_todos: Option<Vec<SubTodo>>,
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-#[serde(rename_all = "camelCase")]
-struct SubTodo {
-    id: String,
-    text: String,
-    done: bool,
+struct Task {
+    pub id: String,
+    pub title: String,
+    pub completed: bool,
+    pub children: Vec<Task>,
 }
 
 #[derive(Default)]
-struct TodoPath(PathBuf);
+struct TaskPath(PathBuf);
 
 #[tauri::command]
-fn save_todos(path: State<TodoPath>, items: Vec<Todo>) -> tauri::Result<()> {
+fn save_tasks(path: State<TaskPath>, items: Vec<Task>) -> tauri::Result<()> {
     if let Some(parent) = path.0.parent() {
         fs::create_dir_all(parent)?;
     }
@@ -35,7 +26,7 @@ fn save_todos(path: State<TodoPath>, items: Vec<Todo>) -> tauri::Result<()> {
 }
 
 #[tauri::command]
-fn load_todos(path: State<TodoPath>) -> tauri::Result<Vec<Todo>> {
+fn load_tasks(path: State<TaskPath>) -> tauri::Result<Vec<Task>> {
     if path.0.exists() {
         Ok(serde_json::from_str(&fs::read_to_string(&path.0)?)?)
     } else {
@@ -52,12 +43,12 @@ pub fn run() {
                 .path()
                 .app_local_data_dir()
                 .expect("failed to resolve local data dir")
-                .join("todos.json");
+                .join("tasks.json");
 
-            app.manage(TodoPath(data_path));
+            app.manage(TaskPath(data_path));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![save_todos, load_todos])
+        .invoke_handler(tauri::generate_handler![save_tasks, load_tasks])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
