@@ -12,9 +12,8 @@
     let childText = '';
     let isEditing = false;
     let editText = task.title;
+    let isExpanded = false;
     let subEditingId: string | null = null;
-
-    $: isExpanded = task.isExpanded;
 
     function onToggleComplete() {
         tasks.toggleComplete(task.id);
@@ -22,7 +21,7 @@
     }
 
     function onToggleExpand() {
-        tasks.toggleExpand(task.id);
+        isExpanded = !isExpanded;
     }
 
     function startEdit() {
@@ -55,7 +54,7 @@
     }
 
     function handleSubConfirm(id: string, newText: string) {
-        tasks.updateSubText(id, newText);
+        tasks.updateText(id, newText);
         subEditingId = null;
     }
 
@@ -67,8 +66,8 @@
         tasks.toggleComplete(id);
     }
 
-    function handleSubRemove(parentId: string, childId: string) {
-        tasks.removeSubTask(parentId, childId);
+    function handleSubRemove(_parentId: string, childId: string) {
+        tasks.removeTask(childId);
     }
 
     function removeTask() {
