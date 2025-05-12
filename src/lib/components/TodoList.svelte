@@ -1,7 +1,7 @@
 <script lang="ts">
-    import TodoItem from './TodoItem.svelte';
+    import TaskNode from './TaskNode.svelte';
     import AddButton from './AddButton.svelte';
-    import { todos } from '$lib/stores/todos';
+    import { tasks } from '$lib/stores/TaskStore';
     import { dndzone } from 'svelte-dnd-action';
     import { flip } from 'svelte/animate';
     import { fly } from 'svelte/transition';
@@ -10,13 +10,13 @@
 
     function add() {
         if (newTodo.trim()) {
-            todos.add(newTodo.trim());
+            tasks.addTask(newTodo.trim());
             newTodo = '';
         }
     }
 
     function syncOrder(event: CustomEvent) {
-        todos.set(event.detail.items);
+        tasks.set(event.detail.items);
     }
 </script>
 
@@ -27,18 +27,18 @@
 
     <div
         use:dndzone={{ 
-            items: $todos, 
+            items: $tasks, 
             flipDurationMs:200,
             dropTargetStyle: {}
         }}
         on:consider={syncOrder}
         on:finalize={syncOrder}
         class="w-full flex flex-col gap-3">
-        {#each $todos as todo (todo.id)}
+        {#each $tasks as task (task.id)}
             <div 
                 in:fly={{ y: 20, duration: 250, opacity: 0 }}
                 animate:flip={{ duration: 200 }}>
-                <TodoItem {todo} />
+                <TaskNode {task} />
             </div>
         {/each}
     </div>
