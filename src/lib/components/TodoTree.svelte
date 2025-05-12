@@ -2,9 +2,27 @@
     import TaskNode from './TaskNode.svelte';
     import AddButton from './AddButton.svelte';
     import { tasks } from '$lib/stores/TaskStore';
+    import { activeTaskId } from '$lib/stores/Navigation';
     import { dndzone } from 'svelte-dnd-action';
     import { flip } from 'svelte/animate';
     import { fly } from 'svelte/transition';
+
+    function findTask(items: Task[], id: string): Task | null {
+        for (const t of items) {
+            if (t.id === id) return t;
+            if (t.children.length) {
+                const f = findTask(t.children, id);
+                if (f) return f;
+            }
+        }
+        return null;
+    }
+
+    let navStack: string[] = [];
+
+    $: allTasks = $tasks;
+    $: focusedTask = $activeTaskId ? findTask(allTasks, $activeTaskId) : null;
+    $: displayedTasks = focusedTask ? focusedTask.children : allTasks;
 
     let newTodo = '';
 
@@ -16,29 +34,47 @@
     }
 
     function syncOrder(event: CustomEvent) {
-        tasks.set(event.detail.items);
+        const items = event.detail.items as Task[];
+        if ($activeTaskId) {
+            tasks.reorderChildren($activeTaskId, items);
+        } else {
+            tasks.reorderChildren(null, items);
+        }
+    }
+
+    function handleEnter(event: CustomEvent<{ id: string }>) {
+        navStack.push($activeTaskId);
+        activeTaskId.set(event.detail.id);
+    }
+
+    function goBack() {
+        const prev = navStack.pop() ?? null;
+        activeTaskId.set(prev);
     }
 </script>
 
 <div class="space-y-4 w-full max-w-md mx-auto font-sans">
     <header class="text-gray-500 text-2xl font-bold mb-2 text-shadow-sm">
-        {new Date().toLocaleDateString()}'s ToDo
+        {#if focusedTask}
+            <button on:click={goBack} class="btn-back">← 이전으로</button>
+            <h2>“{focusedTask.title}” 하위 작업</h2>
+        {:else}
+            <h2>전체 작업</h2>
+        {/if}
     </header>
 
     <div
         use:dndzone={{ 
-            items: $tasks, 
+            items: displayedTasks, 
             flipDurationMs:200,
             dropTargetStyle: {}
         }}
         on:consider={syncOrder}
         on:finalize={syncOrder}
         class="w-full flex flex-col gap-3">
-        {#each $tasks as task (task.id)}
-            <div 
-                in:fly={{ y: 20, duration: 250, opacity: 0 }}
-                animate:flip={{ duration: 200 }}>
-                <TaskNode {task} />
+        {#each displayedTasks as task (task.id)}
+            <div in:fly={{ y: 20, duration: 250 }} animate:flip={{ duration: 200 }}>
+                <TaskNode {task} on:enter={handleEnter} />
             </div>
         {/each}
     </div>

@@ -1,10 +1,12 @@
 <script lang="ts">
     import type { Task } from '../types';
     import { tasks } from '../stores/TaskStore';
+    import { createEventDispatcher } from 'svelte';
 
     import { TaskNode, ProgressBar, AddSubButton, DropdownMenu, InlineEditor, SubTask } from '$lib/components'
     import { makeMenuItems } from '$lib/helpers/menus';
 
+    const dispatch = createEventDispatcher();
     export let task: Task;
     export let depth: number = 0;
 
@@ -48,6 +50,10 @@
         }
     }
 
+    function removeTask() {
+        tasks.removeTask(task.id);
+    }
+
     function handleSubStartEdit(id: string, text: string) {
         subEditingId = id;
         editText = text;
@@ -70,10 +76,6 @@
         tasks.removeTask(childId);
     }
 
-    function removeTask() {
-        tasks.removeTask(task.id);
-    }
-
     $: progress = localCompleted
         ? 100
         : (task.children.filter(c => c.completed).length / Math.max(1, task.children.length)) * 100;
@@ -91,6 +93,10 @@
     }
 
     const mainMenuItems = makeMenuItems(startEdit, removeTask);
+
+    function onEnter() {
+        dispatch('enter', { id: task.id });
+    }
 </script>
 
 <div class="flex flex-col gap-1" style="margin-left: {depth * 1.5}rem;">
@@ -107,7 +113,7 @@
                   on:cancel={cancelEdit}
                 />
             {:else}
-                <span class:line-through={localCompleted} class:text-gray-400={localCompleted}>
+                <span class:line-through={localCompleted} class:text-gray-400={localCompleted} class="cursor-pointer" on:click={onEnter}>
                   {task.title}
                 </span>
             {/if}

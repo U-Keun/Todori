@@ -63,6 +63,28 @@ function traverseRemove(
     }, []);
 }
 
+function traverseReorderChildren(
+    items: Task[],
+    parentId: string | null,
+    newOrder: Task[]
+): Task[] {
+    if (parentId === null) {
+        return newOrder.map(root => {
+            const original = items.find(i => i.id === root.id)!;
+            return { ...original, children: original.children };
+        });
+    }
+    return items.map(item => {
+        if (item.id === parentId) {
+            return { ...item, children: newOrder };
+        }
+        if (item.children.length > 0) {
+            return { ...item, children: traverseReorderChildren(item.children, parentId, newOrder) };
+        }
+        return item;
+    });
+}
+
 function createTaskStore() {
     const { subscribe, set, update } = writable<Task[]>([]);
 
@@ -90,6 +112,9 @@ function createTaskStore() {
         },
         removeTask: (id: string) => {
             update(tasks => traverseRemove(tasks, id));
+        },
+        reorderChildren: (parentId: string | null, newOrder: Task[]) => {
+            update(tasks => traverseReorderChildren(tasks, parentId, newOrder));
         },
     };
 }
