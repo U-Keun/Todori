@@ -12,36 +12,45 @@
     let loading = false;
     let newTitle = '';
 
-    async function loadRoot() {
+    async function loadTasks() {
         loading = true;
-        try {
-            displayedTasks = await invoke<Task[]>('load_root_tasks');
+        try { 
+            if ($activeTaskId === null) {
+                displayedTasks = await invoke<Task[]>('load_root_tasks');
+            } else {
+                displayedTasks = await invoke<Task[]>('load_subtasks', { parentId: $activeTaskId });
+            }
         } catch (e) {
-            console.error('loadRoot error', e);
+            console.error('loadTasks error', e);
         } finally {
             loading = false;
         }
     }
 
-    async function loadSubTasks(parentId: string) {
-        loading = true;
-        displayedTasks = await invoke<Task[]>('load_subtasks', { parentId });
-        loading = false;
+    onMount(loadTasks);
+    $: $activeTaskId, loadTasks();
+
+    function updateLocal(updated: Task) {
+        displayedTasks = displayedTasks.map(t =>
+            t.id === updated.id
+                ? updated
+                : { ...t, children: t.children.map(c => c.id === updated.id ? updated : c) }
+        );
     }
 
-    $: if ($activeTaskId === null) {
-        loadRoot();
-    } else {
-        loadSubTasks($activeTaskId);
+    function removeLocal(id: string) {
+        displayedTasks = displayedTasks
+            .filter(t => t.id !== id)
+            .map(t => ({ ...t, children: t.children.filter(c => c.id !== id) }));
     }
 
-    function handleEnter(event: CustomEvent<{ id: string }>) {
-        activeTaskId.set(event.detail.id);
-    }
-
-    function goBack() {
-        activeTaskId.set(null);
-    }
+    function addLocalChild(parentId: string, child: Task) {
+        displayedTasks = displayedTasks.map(t =>
+            t.id === parentId
+                ? { ...t, children: [...t.children, child] }
+                : t
+        );
+    } 
 
     async function handleAdd() {
         if (!newTitle.trim()) return;
@@ -56,56 +65,39 @@
     async function handleAddChild(event: CustomEvent<{ parentId: string; text: string }>) {
         const { parentId, text } = event.detail;
         const created: Task = await invoke('add_task', { title: text, parentId });
-        displayedTasks = displayedTasks.map(item =>
-            item.id === parentId
-                ? { ...item, children: [...item.children, created] }
-                : item
-            );
+        addLocalChild(parentId, created);
     }
     
     async function handleUpdate(id: string, newTitle: string) {
         const updated: Task = await invoke('update_task', { id, newTitle });
-        displayedTasks = displayedTasks.map(t => {
-            if (t.id === id) { return updated; }
-            const newChildren = t.children.map(c =>
-                c.id === id ? updated : c
-            );
-
-            return newChildren !== t.children
-                ? { ...t, children: newChildren }
-                : t;
-        });
+        updateLocal(updated);
     }
 
     async function handleToggle(id: string) {
         const updated: Task = await invoke('toggle_complete', { id });
-        displayedTasks = displayedTasks.map(t => {
-            if (t.id === id) { return updated; }
-            const newChildren = t.children.map(c =>
-                c.id === id ? updated : c
-            );
-
-            return newChildren !== t.children
-                ? { ...t, children: newChildren }
-                : t;
-        });
+        updateLocal(updated);
     }
 
     async function handleRemove(id: string) {
         await invoke('remove_task', { id });
-        displayedTasks = displayedTasks
-        .filter(t => t.id !== id)
-        .map(t => ({
-          ...t,
-          children: t.children.filter(c => c.id !== id)
-        }));
+        removeLocal(id);
     }
 
     function syncOrder(event: CustomEvent) {
         const items = event.detail.items as Task[];
-        const parentId = $activeTaskId ?? null;
-        invoke('reorder_children', { parentId, newOrder: items.map(i => i.id) });
+        invoke('reorder_children', { 
+            parentId: $activeTaskId, 
+            newOrder: items.map(i => i.id) 
+        });
         displayedTasks = items;
+    }
+
+    function handleEnter(event: CustomEvent<{ id: string }>) {
+        activeTaskId.set(event.detail.id);
+    }
+
+    function goBack() {
+        activeTaskId.set(null);
     }
 </script>
 
@@ -159,7 +151,7 @@
 
         <input
             bind:value={newTitle}
-            placeholder="new Task"
+            placeholder="new task"
             class="w-full pl-12 border-0 rounded-xl border pr-4 py-2 bg-white dark:bg-white focus:outline-none shadow" />
     </form>
 </div>

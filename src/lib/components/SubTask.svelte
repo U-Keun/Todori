@@ -15,10 +15,10 @@
         subremove: { id: string };
     }>();
 
-    function startEdit() {
-        isEditing = true;
-        editText = child.title;
-    }
+    const menuItems = makeMenuItems(
+        () => { isEditing = true; editText = child.title; },
+        () => dispatch('subremove', { id: child.id }),
+    );
 
     function confirmEdit() {
         if (editText.trim()) {
@@ -35,12 +35,6 @@
     function onToggle() {
         dispatch('subtoggle', { id: child.id });
     }
-
-    function onRemove() {
-        dispatch('subremove', { id: child.id });
-    }
-
-    const menuItems = makeMenuItems(startEdit, onRemove);
 </script>
 
 <div class="flex items-center justify-between gap-2 rounded-xl bg-white dark:bg-white px-3 py-0.5 shadow font-sans text-gray-500">

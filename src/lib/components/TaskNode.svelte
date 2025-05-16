@@ -1,12 +1,10 @@
 <script lang="ts">
     import type { Task } from '../types';
     import { createEventDispatcher } from 'svelte';
-
     import { ProgressBar, AddSubButton, DropdownMenu, InlineEditor, SubTask } from '$lib/components'
     import { makeMenuItems } from '$lib/helpers/menus';
 
     export let task: Task;
-    export let depth: number = 0;
 
     let childText = '';
     let isEditing = false;
@@ -20,11 +18,15 @@
         edit: { id: string; text: string };
         add: { parentId: string; text: string };
         remove: { id: string };
-        expand: { id: string; expanded: boolean };
         subedit: { id: string; text: string };
         subtoggle: { id: string };
         subremove: { id: string };
     }>();
+
+    const mainMenuItems = makeMenuItems(
+        () => { isEditing = true; editText = task.title; },
+        () => dispatch('remove', { id: task.id }),
+    );
 
     function onEnter() {
         dispatch('enter', { id: task.id });
@@ -32,11 +34,6 @@
 
     function onToggle() {
         dispatch('toggle', { id: task.id });
-    }
-
-    function startEdit() {
-        isEditing = true;
-        editText = task.title;
     }
 
     function confirmEdit() {
@@ -51,21 +48,11 @@
         editText = task.title;
     }
 
-    function onExpand() {
-        isExpanded = !isExpanded;
-        dispatch('expand', { id: task.id, expanded: isExpanded });
-    }
-
     function onAddChild() {
-        if (childText.trim()) {
-            dispatch('add', { parentId: task.id, text: childText.trim() });
-            childText = '';
-            isExpanded = true;
-        }
-    }
-
-    function onRemove() {
-        dispatch('remove', { id: task.id });
+        if (!childText.trim()) return;
+        dispatch('add', { parentId: task.id, text: childText.trim() });
+        childText = '';
+        isExpanded = true;
     }
 
     function handleSubEdit(id: string, text: string) {
@@ -98,10 +85,12 @@
         };
     }
 
-    const mainMenuItems = makeMenuItems(startEdit, onRemove);
+    function onExpand() {
+        isExpanded = !isExpanded;
+    }
 </script>
 
-<div class="flex flex-col gap-1" style="margin-left: {depth * 1.5}rem;">
+<div class="flex flex-col gap-1">
     <div class="flex items-center justify-between gap-3 rounded-xl bg-white dark:bg-white px-3 py-2 shadow font-sans text-gray-500">
         <div class="flex items-center gap-2">
             <button on:click={onExpand} class="w-6 h-6 rounded border text-xs grid place-content-center hover:bg-gray-200">
