@@ -18,6 +18,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            get_task,
             load_root_tasks,
             load_subtasks,
             add_task,

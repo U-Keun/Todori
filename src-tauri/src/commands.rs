@@ -74,6 +74,17 @@ fn find_by_id(tasks: &[Task], id: &str) -> Option<Task> {
 }
 
 #[tauri::command]
+pub fn get_task(path: State<TaskPath>, id: String) -> tauri::Result<Task> {
+    let all = path.read_all()?;
+    let task = find_by_id(&all, &id)
+        .ok_or_else(|| tauri::Error::Io(IoError::new(
+            ErrorKind::NotFound,
+            format!("Task with id {} not found", id),
+        )))?;
+    Ok(task)
+}
+
+#[tauri::command]
 pub fn load_subtasks(path: State<TaskPath>, parent_id: String) -> tauri::Result<Vec<Task>> {
     let all = path.read_all()?;
     if let Some(parent) = find_by_id(&all, &parent_id) {
