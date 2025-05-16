@@ -9,7 +9,9 @@ pub struct Task {
     pub id: String,
     pub title: String,
     pub completed: bool,
-    pub children: Vec<Task>,
+    pub children: Vec<Task>,   
+    #[serde(default)]
+    pub order: usize,
 }
 
 #[derive(Default)]
@@ -19,7 +21,15 @@ impl TaskPath {
     fn read_all(&self) -> tauri::Result<Vec<Task>> {
         if self.0.exists() {
             let s = fs::read_to_string(&self.0)?;
-            let tasks: Vec<Task> = serde_json::from_str(&s)?;
+            let mut tasks: Vec<Task> = serde_json::from_str(&s)?;
+            tasks.sort_by_key(|t| t.order);
+            fn sort_rec(tasks: &mut [Task]) {
+                for t in tasks.iter_mut() {
+                    t.children.sort_by_key(|c| c.order);
+                    sort_rec(&mut t.children);
+                }
+            }
+            sort_rec(&mut tasks);
             Ok(tasks)
         } else {
             Ok(Vec::new())
@@ -30,7 +40,17 @@ impl TaskPath {
         if let Some(parent) = self.0.parent() {
             fs::create_dir_all(parent)?;
         }
-        let json = serde_json::to_string_pretty(tasks)?;
+
+        let mut tasks_to_write = tasks.clone();
+        fn assign_order(tasks: &mut [Task]) {
+            for (idx, t) in tasks.iter_mut().enumerate() {
+                t.order = idx;
+                assign_order(&mut t.children);
+            }
+        }
+        assign_order(&mut tasks_to_write);
+
+        let json = serde_json::to_string_pretty(&tasks_to_write)?;
         fs::write(&self.0, json)?;
         Ok(())
     }
@@ -75,6 +95,7 @@ pub fn add_task(
         title: title.clone(),
         completed: false,
         children: Vec::new(),
+        order: 0,
     };
     if let Some(pid) = parent_id {
         fn insert(tasks: &mut Vec<Task>, pid: &str, child: Task) -> bool {
@@ -200,14 +221,17 @@ pub fn reorder_children(
 ) -> tauri::Result<()> {
     let mut all = path.read_all()?;
     fn reorder(tasks: &mut Vec<Task>, order: &[String]) {
-        let mut map = HashMap::new();
-        for t in tasks.drain(..) {
-            map.insert(t.id.clone(), t);
-        }
+        let mut map: HashMap<String, Task>= tasks
+            .drain(..)
+            .map(|t| (t.id.clone(), t))
+            .collect();
         for id in order {
             if let Some(t) = map.remove(id) {
                 tasks.push(t);
             }
+        }
+        for (_, t) in map {
+            tasks.push(t);
         }
     }
     if let Some(ref pid) = parent_id {

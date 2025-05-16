@@ -83,9 +83,9 @@
         removeLocal(id);
     }
 
-    function syncOrder(event: CustomEvent) {
+    async function syncOrder(event: CustomEvent) {
         const items = event.detail.items as Task[];
-        invoke('reorder_children', { 
+        await invoke('reorder_children', { 
             parentId: $activeTaskId, 
             newOrder: items.map(i => i.id) 
         });
