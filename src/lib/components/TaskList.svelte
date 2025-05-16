@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
+    import { onDestroy } from 'svelte';
     import { invoke } from '@tauri-apps/api/core';
     import type { Task } from '../types';
-    import { activeTaskId } from '$lib/stores/Navigation';
+    import { activeTaskId, navigateTo, navigateBack } from '$lib/stores/Navigation';
     import { TaskNode, AddButton } from '$lib/components';
     import { dndzone } from 'svelte-dnd-action';
     import { fly } from 'svelte/transition';
@@ -27,8 +27,13 @@
         }
     }
 
-    onMount(loadTasks);
-    $: $activeTaskId, loadTasks();
+    const unsubscribe = activeTaskId.subscribe(async (id) => {
+        if (id === null) {
+            displayedTasks = await invoke<Task[]>('load_root_tasks');
+        } else {
+            displayedTasks = await invoke<Task[]>('load_subtasks', { parentId: id });
+        }
+    });
 
     function updateLocal(updated: Task) {
         displayedTasks = displayedTasks.map(t =>
@@ -96,15 +101,13 @@
         activeTaskId.set(event.detail.id);
     }
 
-    function goBack() {
-        activeTaskId.set(null);
-    }
+    onDestroy(unsubscribe);
 </script>
 
 <div class="max-w-md mx-auto p-4 space-y-4 font-sans">
     <header class="flex items-center justify-between text-gray-500">
         {#if $activeTaskId}
-            <button on:click={goBack} class="px-2 py-1 bg-gray-200 rounded">go back</button>
+            <button on:click={navigateBack} class="px-2 py-1 bg-gray-200 rounded">go back</button>
             <h2 class="text-lg font-bold">“{displayedTasks[0]?.title ?? '...'}“ 하위 작업</h2>
         {:else}
             <h2 class="text-lg font-bold">전체 작업</h2>
