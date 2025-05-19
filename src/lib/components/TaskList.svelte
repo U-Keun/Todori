@@ -1,8 +1,8 @@
 <script lang="ts">
     import { invoke } from '@tauri-apps/api/core';
-    import type { Task, PageData } from '../types';
+    import type { Task } from '../types';
     import { activeTaskId, navDirection, navigateTo, navigateBack } from '$lib/stores/Navigation';
-    import { fetchPage } from '$lib/stores/TaskStore';
+    import { fetchPage, addTask, updateTask, toggleTask, removeTask, reorderChildren } from '$lib/stores/TaskStore';
     import { TaskNode, AddButton } from '$lib/components';
     import { dndzone } from 'svelte-dnd-action';
     import { fly, fade } from 'svelte/transition';
@@ -51,41 +51,35 @@
 
     async function handleAdd() {
         if (!newTitle.trim()) return;
-        const created: Task = await invoke('add_task', {
-            title: newTitle,
-            parentId: $activeTaskId ?? null
-        });
+        const created  = await addTask($activeTaskId, newTitle);
         displayedTasks = [...displayedTasks, created];
         newTitle = '';
     }
 
     async function handleAddChild(event: CustomEvent<{ parentId: string; text: string }>) {
         const { parentId, text } = event.detail;
-        const created: Task = await invoke('add_task', { title: text, parentId });
+        const created = await addTask(parentId, text);
         addLocalChild(parentId, created);
     }
     
     async function handleUpdate(id: string, newTitle: string) {
-        const updated: Task = await invoke('update_task', { id, newTitle });
+        const updated = await updateTask(id, newTitle);
         updateLocal(updated);
     }
 
     async function handleToggle(id: string) {
-        const updated: Task = await invoke('toggle_complete', { id });
+        const updated = await toggleTask(id);
         updateLocal(updated);
     }
 
     async function handleRemove(id: string) {
-        await invoke('remove_task', { id });
+        await removeTask(id);
         removeLocal(id);
     }
 
     async function syncOrder(event: CustomEvent) {
         const items = event.detail.items as Task[];
-        await invoke('reorder_children', { 
-            parentId: $activeTaskId, 
-            newOrder: items.map(i => i.id) 
-        });
+        await reorderChildren($activeTaskId, items.map(i => i.id));
         displayedTasks = items;
     }
 

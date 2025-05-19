@@ -1,16 +1,15 @@
-import type { Task } from '../types';
+import type { Task, PageData } from '../types';
 import { invoke } from '@tauri-apps/api/core';
 
 const childrenCache = new Map<string, Task[]>();
 const titleCache = new Map<string, string>();
 
-export interface PageData {
-    parentTitle: string;
-    children: Task[];
+function cacheKey(id: string | null) {
+    return id ?? 'root';
 }
 
 export async function fetchPage(id: string | null): Promise<PageData> {
-    let parentTitle = '전체 작업';
+    let parentTitle = 'Project';
     if (id !== null) {
         if (titleCache.has(id)) {
             parentTitle = titleCache.get(id)!;
@@ -22,7 +21,7 @@ export async function fetchPage(id: string | null): Promise<PageData> {
     }
 
     const key = id ?? 'root';
-    let children: Taks[];
+    let children: Task[];
     if (childrenCache.has(key)) {
         children = childrenCache.get(key)!;
     } else {
@@ -33,4 +32,43 @@ export async function fetchPage(id: string | null): Promise<PageData> {
     }
 
     return { parentTitle, children };
+}
+
+function invalidateChildren(id: string | null) {
+    childrenCache.delete(cacheKey(id));
+}
+
+export async function addTask(parentId: string | null, title: string): Promise<Task> {
+    const created: Task = await invoke('add_task', { parentId, title });
+    invalidateChildren(parentId);
+    return created;
+}
+
+export async function updateTask(id: string, newTitle: string): Promise<Task> {
+    const updated: Task = await invoke('update_task', { id, newTitle });
+    invalidateChildren(null);
+    titleCache.delete(id);
+    return updated;
+}
+
+export async function toggleTask(id: string): Promise<Task> {
+    console.log("hello");
+    const updated: Task = await invoke('toggle_complete', { id });
+    invalidateChildren(null);
+    return updated;
+}
+
+export async function removeTask(id: string): Promise<void> {
+    await invoke('remove_task', { id });
+    invalidateChildren(null);
+}
+
+export async function reorderChildren(parentId: string | null, newOrder: string[]): Promise<void> {
+    await invoke('reorder_children', { parentId, newOrder });
+    invalidateChildren(parentId);
+}
+
+export function clearCache() {
+    childrenCache.clear();
+    titleCache.clear();
 }
