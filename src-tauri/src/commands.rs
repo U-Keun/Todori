@@ -86,12 +86,8 @@ pub fn get_task(path: State<TaskPath>, id: String) -> tauri::Result<Task> {
 
 #[tauri::command]
 pub fn load_subtasks(path: State<TaskPath>, parent_id: String) -> tauri::Result<Vec<Task>> {
-    let all = path.read_all()?;
-    if let Some(parent) = find_by_id(&all, &parent_id) {
-        Ok(parent.children)
-    } else {
-        Ok(Vec::new())
-    }
+    let parent = get_task(path, parent_id)?;
+    Ok(parent.children)
 }
 
 #[tauri::command]

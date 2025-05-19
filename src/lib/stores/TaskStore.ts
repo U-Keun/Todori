@@ -1,122 +1,36 @@
-import { writable } from 'svelte/store';
 import type { Task } from '../types';
+import { invoke } from '@tauri-apps/api/core';
 
-function traverseToggle(
-    items: Task[],
-    id: string,
-): Task[] {
-    return items.map(item => {
-        if (item.id === id) {
-            return { ...item, completed: !item.completed };
-        }
-        if (item.children.length > 0) {
-            return { ...item, children: traverseToggle(item.children, id) };
-        }
-        return item;
-    });
+const childrenCache = new Map<string, Task[]>();
+const titleCache = new Map<string, string>();
+
+export interface PageData {
+    parentTitle: string;
+    children: Task[];
 }
 
-function traverseAddChild(
-    items: Task[],
-    parentId: string,
-    child: Task
-): Task[] {
-    return items.map(item => {
-        if (item.id === parentId) {
-            return { ...item, isExpanded: true, children: [...item.children, child] };
+export async function fetchPage(id: string | null): Promise<PageData> {
+    let parentTitle = '전체 작업';
+    if (id !== null) {
+        if (titleCache.has(id)) {
+            parentTitle = titleCache.get(id)!;
+        } else {
+            const parent: Task = await invoke('get_task', { id });
+            parentTitle = parent.title;
+            titleCache.set(id, parentTitle);
         }
-        if (item.children.length > 0) {
-            return { ...item, children:traverseAddChild(item.children, parentId, child) };
-        }
-        return item;
-    });
-}
-
-function traverseUpdateText(
-    items: Task[],
-    id: string,
-    newText: string
-): Task[] {
-    return items.map(item => {
-        if (item.id === id) {
-            return { ...item, title: newText };
-        }
-        if (item.children.length > 0) {
-            return { ...item, children: traverseUpdateText(item.children, id, newText) };
-        }
-        return item;
-    });
-}
-
-function traverseRemove(
-    items: Task[],
-    id: string
-): Task[] {
-    return items.reduce<Task[]>((acc, item) => {
-        if (item.id === id) {
-            return acc;
-        }
-        const updated = item.children.length
-            ? { ...item, children: traverseRemove(item.children, id) }
-            : item;
-        return [...acc, updated];
-    }, []);
-}
-
-function traverseReorderChildren(
-    items: Task[],
-    parentId: string | null,
-    newOrder: Task[]
-): Task[] {
-    if (parentId === null) {
-        return newOrder.map(root => {
-            const original = items.find(i => i.id === root.id)!;
-            return { ...original, children: original.children };
-        });
     }
-    return items.map(item => {
-        if (item.id === parentId) {
-            return { ...item, children: newOrder };
-        }
-        if (item.children.length > 0) {
-            return { ...item, children: traverseReorderChildren(item.children, parentId, newOrder) };
-        }
-        return item;
-    });
+
+    const key = id ?? 'root';
+    let children: Taks[];
+    if (childrenCache.has(key)) {
+        children = childrenCache.get(key)!;
+    } else {
+        children = id === null
+            ? await invoke<Task[]>('load_root_tasks')
+            : await invoke<Task[]>('load_subtasks', { parentId: id });
+        childrenCache.set(key, children);
+    }
+
+    return { parentTitle, children };
 }
-
-function createTaskStore() {
-    const { subscribe, set, update } = writable<Task[]>([]);
-
-    return {
-        subscribe,
-        set,
-        addTask: (title: string, parentId?: string) => {
-            const newTask: Task = {
-                id: crypto.randomUUID(),
-                title,
-                completed: false,
-                children: []
-            };
-            update(tasks => 
-                parentId
-                    ? traverseAddChild(tasks, parentId, newTask)
-                    : [...tasks, newTask]
-            );
-        },
-        toggleComplete: (id: string) => {
-            update(tasks => traverseToggle(tasks, id));
-        },
-        updateText: (id: string, newText: string) => {
-            update(tasks => traverseUpdateText(tasks, id, newText));
-        },
-        removeTask: (id: string) => {
-            update(tasks => traverseRemove(tasks, id));
-        },
-        reorderChildren: (parentId: string | null, newOrder: Task[]) => {
-            update(tasks => traverseReorderChildren(tasks, parentId, newOrder));
-        },
-    };
-}
-
-export const tasks = createTaskStore();
