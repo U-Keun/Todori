@@ -4,3 +4,8 @@ export interface Task {
     completed: boolean;
     children: Task[];
 }
+
+export interface PageData {
+    parentTitle: string;
+    children: Task[];
+}

@@ -3,6 +3,7 @@
     import { createEventDispatcher } from 'svelte';
     import { ProgressBar, AddSubButton, DropdownMenu, InlineEditor, SubTask } from '$lib/components'
     import { makeMenuItems } from '$lib/helpers/menus';
+    import { activeTaskId, navigateTo, navigateBack } from '$lib/stores/navigation';
 
     export let task: Task;
 
@@ -29,7 +30,7 @@
     );
 
     function onEnter() {
-        dispatch('enter', { id: task.id });
+        navigateTo(task.id);
     }
 
     function onToggle() {
