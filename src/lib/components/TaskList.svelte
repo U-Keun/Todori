@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Task } from '../types';
-    import { activeTaskId, navDirection, navigateTo, navigateBack } from '$lib/stores/Navigation';
-    import { fetchPage, addTask, updateTask, toggleTask, removeTask, reorderChildren } from '$lib/stores/TaskStore';
+    import { activeTaskId, navDirection, navigateTo, navigateBack, 
+            fetchPage, addTask, updateTask, toggleTask, removeTask, reorderChildren } from '$lib/stores/TaskStore';
     import { TaskNode, AddButton } from '$lib/components';
     import { dndzone } from 'svelte-dnd-action';
     import { fly, fade } from 'svelte/transition';
@@ -90,8 +90,8 @@
 <div class="max-w-md mx-auto p-4 space-y-4 font-sans">
     <header class="flex items-center justify-between text-gray-500">
         {#if $activeTaskId}
+            <h2 class="text-lg font-bold">{parentTitle}</h2>
             <button on:click={navigateBack} class="px-2 py-1 bg-gray-200 rounded">go back</button>
-            <h2 class="text-lg font-bold">“{parentTitle}“</h2>
         {:else}
             <h2 class="text-lg font-bold">Project</h2>
         {/if}

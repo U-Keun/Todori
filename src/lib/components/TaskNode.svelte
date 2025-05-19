@@ -3,7 +3,7 @@
     import { createEventDispatcher } from 'svelte';
     import { ProgressBar, AddSubButton, DropdownMenu, InlineEditor, SubTask } from '$lib/components'
     import { makeMenuItems } from '$lib/helpers/menus';
-    import { activeTaskId, navigateTo, navigateBack } from '$lib/stores/navigation';
+    import { activeTaskId, navigateTo, navigateBack } from '$lib/stores/TaskStore';
 
     export let task: Task;
 
@@ -93,19 +93,25 @@
 
 <div class="flex flex-col gap-1">
     <div class="flex items-center justify-between gap-3 rounded-xl bg-white dark:bg-white px-3 py-2 shadow font-sans text-gray-500">
-        <div class="flex items-center gap-2">
+        <div class="flex-1 min-w-0 flex items-center gap-2">
             <button on:click={onExpand} class="w-6 h-6 rounded border text-xs grid place-content-center hover:bg-gray-200">
                 {isExpanded ? '▾' : '▸'}
             </button>
 
             {#if isEditing}
-                <InlineEditor
-                  initial={task.title}
-                  on:confirm={({ detail }) => { editText = detail; confirmEdit(); }}
-                  on:cancel={cancelEdit}
-                />
+                <div class="flex-1 min-w-0">
+                    <InlineEditor
+                      initial={task.title}
+                      on:confirm={({ detail }) => { editText = detail; confirmEdit(); }}
+                      on:cancel={cancelEdit}
+                    />
+                </div>
             {:else}
-                <span class:line-through={task.completed} class:text-gray-400={task.completed} class="cursor-pointer" on:click={onEnter}>
+                <span 
+                    class:line-through={task.completed} 
+                    class:text-gray-400={task.completed} 
+                    class="flex-1 min-w-0 cursor-pointer truncate" 
+                    on:click={onEnter}>
                   {task.title}
                 </span>
             {/if}
