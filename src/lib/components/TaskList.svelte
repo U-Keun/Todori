@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { invoke } from '@tauri-apps/api/core';
     import type { Task } from '../types';
     import { activeTaskId, navDirection, navigateTo, navigateBack } from '$lib/stores/Navigation';
     import { fetchPage, addTask, updateTask, toggleTask, removeTask, reorderChildren } from '$lib/stores/TaskStore';
