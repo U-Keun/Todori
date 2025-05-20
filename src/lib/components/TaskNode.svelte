@@ -5,6 +5,7 @@
     import { makeMenuItems } from '$lib/helpers/menus';
     import { activeTaskId, navigateTo, navigateBack } from '$lib/stores/TaskStore';
     import { slide } from 'svelte/transition';
+    import { tapHold } from '$lib/actions/tapHold';
 
     export let task: Task;
 
@@ -118,7 +119,9 @@
                     class:line-through={task.completed} 
                     class:text-gray-400={task.completed} 
                     class="flex-1 min-w-0 cursor-pointer truncate" 
-                    on:click={toggleMemo}>
+                    use:tapHold={{ duration: 300 }}
+                    on:hold={toggleMemo}
+                    on:tap={onEnter}>
                   {task.title}
                 </span>
             {/if}
