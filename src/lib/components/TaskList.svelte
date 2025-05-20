@@ -1,7 +1,6 @@
 <script lang="ts">
     import type { Task } from '../types';
-    import { activeTaskId, navDirection, navigateTo, navigateBack, 
-            fetchPage, addTask, updateTask, toggleTask, removeTask, reorderChildren } from '$lib/stores/TaskStore';
+    import { activeTaskId, navDirection, navigateTo, navigateBack, fetchPage, addTask, updateTask, toggleTask, removeTask, reorderChildren } from '$lib/stores/TaskStore';
     import { TaskNode, AddButton } from '$lib/components';
     import { dndzone } from 'svelte-dnd-action';
     import { fly, fade } from 'svelte/transition';
