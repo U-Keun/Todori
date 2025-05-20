@@ -4,6 +4,7 @@
     import { ProgressBar, AddSubButton, DropdownMenu, InlineEditor, SubTask } from '$lib/components'
     import { makeMenuItems } from '$lib/helpers/menus';
     import { activeTaskId, navigateTo, navigateBack } from '$lib/stores/TaskStore';
+    import { slide } from 'svelte/transition';
 
     export let task: Task;
 
@@ -12,6 +13,7 @@
     let editText = task.title;
     let isExpanded = false;
     let subEditingId: string | null = null;
+    let isMemoOpen = false;
 
     const dispatch = createEventDispatcher<{
         enter: { id: string };
@@ -89,6 +91,11 @@
     function onExpand() {
         isExpanded = !isExpanded;
     }
+
+    function toggleMemo() {
+        console.log('toggle memo!');
+        isMemoOpen = !isMemoOpen;
+    }
 </script>
 
 <div class="flex flex-col gap-1">
@@ -111,7 +118,7 @@
                     class:line-through={task.completed} 
                     class:text-gray-400={task.completed} 
                     class="flex-1 min-w-0 cursor-pointer truncate" 
-                    on:click={onEnter}>
+                    on:click={toggleMemo}>
                   {task.title}
                 </span>
             {/if}
@@ -122,8 +129,18 @@
                 ✔
             </button>
             <DropdownMenu items={mainMenuItems} />
-        </div>
+        </div>   
     </div>
+
+    {#if isMemoOpen}
+        <div
+            class="mt-2 bg-gray-50 rounded-b-xl shadow-inner p-4 -mt-px w-[calc(19/20*100%)] mx-auto"
+            in:slide={{ duration: 200 }}
+            out:slide={{ duration: 200 }}
+        >
+            <p class="text-sm text-gray-700 mb-4">{task.title}</p>
+        </div>
+    {/if}
 
     {#if isExpanded}
         <div class="relative pl-10 mt-2" transition:collapse>
