@@ -37,14 +37,16 @@
     }
 </script>
 
-<div class="flex items-center justify-between gap-2 rounded-xl bg-white dark:bg-white px-3 py-0.5 shadow font-sans text-gray-500">
+<div class="flex items-center justify-between gap-2 rounded-xl bg-white dark:bg-white px-3 py-0.5 shadow font-sans text-gray-500 flex-1 min-w-0">
     {#if isEditing}
-        <InlineEditor
-            initial={child.title}
-            on:confirm={({ detail }) => { editText = detail; confirmEdit(); }}
-            on:cancel={cancelEdit} />
+        <div class="flex-1 min-w-0">
+            <InlineEditor
+                initial={child.title}
+                on:confirm={({ detail }) => { editText = detail; confirmEdit(); }}
+                on:cancel={cancelEdit} />
+        </div>
     {:else}
-        <span class="text-sm" class:line-through={child.completed} class:text-zinc-400={child.completed}>
+        <span class="text-sm truncate flex-1 min-w-0" class:line-through={child.completed} class:text-zinc-400={child.completed}>
             {child.title}
         </span>
     {/if}
