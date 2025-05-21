@@ -81,10 +81,13 @@
 
 </script>
 
-<div class="max-w-md mx-auto p-4 space-y-4 font-sans">
+<div class="h-screen max-w-md mx-auto p-4 space-y-4 font-sans h-[90vh]">
 
     {#key $activeTaskId}
-        <div in:fly={{ y: 30, duration: 500, easing: cubicOut }}>
+        <div 
+            in:fly={{ y: 30, duration: 500, easing: cubicOut }}
+            class="fixed top-4 left-0 right-0 w-full max-w-md mx-auto z-20"
+        >
             <TaskHeader
                 activeId={$activeTaskId} 
                 title={$activeTaskId ? parentTitle : 'Project'} 
@@ -92,7 +95,10 @@
             />
         </div>
 
-        <div in:fade={{ delay: 500, duration: 500}}>
+        <div 
+            in:fade={{ delay: 500, duration: 500}}
+            class="mt-[60px] mb-[80px] overflow-y-auto pt-[5px] pb-[80px] w-full max-w-md flex-1"
+        >
             {#if loading}
                 <div class="space-y-2 animate-pulse">
                     <div class="h-6 bg-gray-200 rounded"></div>
@@ -117,7 +123,12 @@
                         />
                     {/each}
                 </div>
-            {/if}
+            {/if}   
+        </div>
+        <div 
+            in:fade={{ delay: 1000, duration: 500 }}
+            class="fixed bottom-4 left-0 right-0 w-full max-w-md mx-auto"
+        >
             <form class="relative w-full max-w-md mt-4">
                 <AddButton
                     on:add={handleAdd}
