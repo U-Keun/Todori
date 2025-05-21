@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Task } from '../types';
     import { createEventDispatcher } from 'svelte';
-    import { ProgressBar, AddSubButton, InlineEditor, SubTask, TaskItem } from '$lib/components'
+    import { ProgressBar, InlineEditor, TaskItem } from '$lib/components'
     import { navigateBack } from '$lib/stores/TaskStore';
     import { slide } from 'svelte/transition';
     import { tapHold } from '$lib/actions/tapHold';
@@ -57,6 +57,7 @@
         {:else}
             <span 
                 class="flex-1 min-w-0 cursor-pointer truncate"
+                class:text-gray-400={isMemoOpen}
                 use:tapHold={{ duration: 300 }}
                 on:hold={toggleMemo}>
                 {title}
@@ -76,7 +77,7 @@
     <svelte:fragment slot="memo">
         {#if isMemoOpen}
             <div
-                class="bg-gray-50 rounded-b-xl shadow-inner p-4 w-[calc(22/23*100%)] mx-auto mb-2"
+                class="bg-gray-50 rounded-b-xl shadow-inner p-4 -mt-px w-[calc(22/23*100%)] mx-auto mb-2"
                 in:slide={{ duration: 200 }}
                 out:slide={{ duration: 200 }}
             >
