@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Task } from '../types';
     import { createEventDispatcher } from 'svelte';
-    import { ProgressBar, AddSubButton, DropdownMenu, InlineEditor, SubTask } from '$lib/components'
+    import { ProgressBar, AddSubButton, DropdownMenu, InlineEditor, SubTask, TaskItem } from '$lib/components'
     import { makeMenuItems } from '$lib/helpers/menus';
     import { activeTaskId, navigateTo, navigateBack } from '$lib/stores/TaskStore';
     import { slide } from 'svelte/transition';
@@ -17,7 +17,6 @@
     let isMemoOpen = false;
 
     const dispatch = createEventDispatcher<{
-        enter: { id: string };
         toggle: { id: string };
         edit: { id: string; text: string };
         add: { parentId: string; text: string };
@@ -94,26 +93,23 @@
     }
 
     function toggleMemo() {
-        console.log('toggle memo!');
         isMemoOpen = !isMemoOpen;
     }
 </script>
 
+
 <div class="flex flex-col gap-1">
-    <div class="flex items-center justify-between gap-3 rounded-xl bg-white dark:bg-white px-3 py-2 shadow font-sans text-gray-500">
-        <div class="flex-1 min-w-0 flex items-center gap-2">
+    <TaskItem>
+        <svelte:fragment slot="leading">
             <button on:click={onExpand} class="w-6 h-6 rounded border text-xs grid place-content-center hover:bg-gray-200">
                 {isExpanded ? '▾' : '▸'}
             </button>
-
-            {#if isEditing}
-                <div class="flex-1 min-w-0">
-                    <InlineEditor
-                      initial={task.title}
-                      on:confirm={({ detail }) => { editText = detail; confirmEdit(); }}
-                      on:cancel={cancelEdit}
-                    />
-                </div>
+            {#if isEditing}   
+                <InlineEditor
+                    initial={task.title}
+                    on:confirm={({ detail }) => { editText = detail; confirmEdit(); }}
+                    on:cancel={cancelEdit}
+                />
             {:else}
                 <span 
                     class:line-through={task.completed} 
@@ -122,53 +118,57 @@
                     use:tapHold={{ duration: 300 }}
                     on:hold={toggleMemo}
                     on:tap={onEnter}>
-                  {task.title}
+                    {task.title}
                 </span>
             {/if}
-        </div>
-        <div class="flex items-center gap-2">
+        </svelte:fragment>
+        <svelte:fragment slot="trailing">
             <ProgressBar progress={(task.completed ? 100 : (task.children.filter(c => c.completed).length / Math.max(1, task.children.length)) * 100)} done={task.completed} />
             <button on:click={onToggle} class="w-7 h-7 rounded-full border grid place-content-center hover:bg-yellow-300">
                 ✔
             </button>
             <DropdownMenu items={mainMenuItems} />
-        </div>   
-    </div>
+        </svelte:fragment>
 
-    {#if isMemoOpen}
-        <div
-            class="mt-2 bg-gray-50 rounded-b-xl shadow-inner p-4 -mt-px w-[calc(19/20*100%)] mx-auto"
-            in:slide={{ duration: 200 }}
-            out:slide={{ duration: 200 }}
-        >
-            <p class="text-sm text-gray-700 mb-4">{task.title}</p>
-        </div>
-    {/if}
-
-    {#if isExpanded}
-        <div class="relative pl-10 mt-2" transition:collapse>
-            <div class="absolute top-0 left-6 w-px bg-gray-300 h-full"></div>
-            <div class="flex flex-col gap-1.5">
-                {#each task.children as child (child.id)}
-                    <SubTask
-                        child={child}
-                        on:subedit={({ detail }) => handleSubEdit(detail.id, detail.text)}
-                        on:subtoggle={({ detail }) => handleSubToggle(detail.id)}
-                        on:subremove={({ detail }) => handleSubRemove(detail.id)}
-                    />
-                {/each}
-            </div>
-            <div class="relative h-10">
-                <div class="absolute inset-0 flex items-center">
-                    <AddSubButton on:add={onAddChild} class="absolute left-2 top-1/2 -translate-y-1/2 z-10 shadow" />
-                    <input
-                        type="text"
-                        placeholder="Add sub-task"
-                        bind:value={childText}
-                        class="w-full border-0 text-xs pr-4 py-1.5 pl-9 bg-white dark:bg-white rounded-xl focus:outline-none shadow"
-                        on:keydown={e => e.key === 'Enter' && onAddChild()} />
+        <svelte:fragment slot="memo">
+            {#if isMemoOpen}
+                <div
+                    class="bg-gray-50 rounded-b-xl shadow-inner p-4 -mt-px w-[calc(22/23*100%)] mx-auto mb-2"
+                    in:slide={{ duration: 200 }}
+                    out:slide={{ duration: 200 }}
+                >
+                    <p class="text-sm text-gray-700 mb-0">{task.title}</p>
                 </div>
-            </div>
-        </div>
-    {/if}
+            {/if}
+        </svelte:fragment>
+
+        <svelte:fragment slot="sub-tasks">
+            {#if isExpanded}
+                <div class="relative pl-10 mt-2" transition:collapse>
+                    <div class="absolute top-0 left-6 w-px bg-gray-300 h-full"></div>
+                    <div class="flex flex-col gap-1.5">
+                        {#each task.children as child (child.id)}
+                            <SubTask
+                                child={child}
+                                on:subedit={({ detail }) => handleSubEdit(detail.id, detail.text)}
+                                on:subtoggle={({ detail }) => handleSubToggle(detail.id)}
+                                on:subremove={({ detail }) => handleSubRemove(detail.id)}
+                            />
+                        {/each}
+                    </div>
+                    <div class="relative h-10">
+                        <div class="absolute inset-0 flex items-center">
+                            <AddSubButton on:add={onAddChild} class="absolute left-2 top-1/2 -translate-y-1/2 z-10 shadow" />
+                            <input
+                                type="text"
+                                placeholder="Add sub-task"
+                                bind:value={childText}
+                                class="w-full border-0 text-xs pr-4 py-1.5 pl-9 bg-white dark:bg-white rounded-xl focus:outline-none shadow"
+                                on:keydown={e => e.key === 'Enter' && onAddChild()} />
+                        </div>
+                    </div>
+                </div>
+            {/if}
+        </svelte:fragment>
+    </TaskItem>
 </div>
