@@ -3,7 +3,9 @@
     import { activeTaskId, fetchPage, addTask, updateTask, toggleTask, removeTask, reorderChildren } from '$lib/stores/TaskStore';
     import { TaskHeader, TaskNode, AddButton } from '$lib/components';
     import { fly, fade } from 'svelte/transition';
+    import { flip } from 'svelte/animate';
     import { cubicOut } from 'svelte/easing';
+    import { dndzone } from 'svelte-dnd-action';
 
     let displayedTasks: Task[] = [];
     let parentTitle = 'Project';
@@ -72,11 +74,9 @@
     }
 
     async function syncOrder(event: CustomEvent) {
-        const items = event.detail.items as Task[];
-        await reorderChildren($activeTaskId, items.map(i => i.id));
-        displayedTasks = items;
+        displayedTasks = event.detail.items as Task[];
+        await reorderChildren($activeTaskId, displayedTasks.map(t => t.id));
     }
-
 </script>
 
 <div
@@ -104,20 +104,26 @@
                 </div>
             {:else}
                 <div
+                    use:dndzone={{
+                        items: displayedTasks,
+                        flipDurationMs: 0,
+                    }}
                     on:consider={syncOrder}
                     on:finalize={syncOrder}
                     class="w-full flex flex-col gap-3">
                     {#each displayedTasks as task, i (task.id)}
-                        <TaskNode
-                            {task}
-                            on:toggle={() => handleToggle(task.id)}
-                            on:add={handleAddChild}
-                            on:edit={(e) => handleUpdate(task.id, e.detail.text)}
-                            on:remove={() => handleRemove(task.id)}
-                            on:subtoggle={({ detail }) => handleToggle(detail.id)}
-                            on:subedit={({ detail }) => handleUpdate(detail.id, detail.text)}
-                            on:subremove={({ detail }) => handleRemove(detail.id)}
-                        />
+                        <div animate:flip={{ duration: 200 }}>
+                            <TaskNode
+                                {task}
+                                on:toggle={() => handleToggle(task.id)}
+                                on:add={handleAddChild}
+                                on:edit={(e) => handleUpdate(task.id, e.detail.text)}
+                                on:remove={() => handleRemove(task.id)}
+                                on:subtoggle={({ detail }) => handleToggle(detail.id)}
+                                on:subedit={({ detail }) => handleUpdate(detail.id, detail.text)}
+                                on:subremove={({ detail }) => handleRemove(detail.id)}
+                            />
+                        </div>
                     {/each}
                 </div>
             {/if}   

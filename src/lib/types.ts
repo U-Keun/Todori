@@ -3,6 +3,9 @@ export interface Task {
     title: string;
     completed: boolean;
     children: Task[];
+
+    isExpanded?: boolean;
+    isMemoOpen?: boolean;
 }
 
 export interface PageData {

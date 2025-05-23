@@ -12,9 +12,7 @@
     let childText = '';
     let isEditing = false;
     let editText = task.title;
-    let isExpanded = false;
     let subEditingId: string | null = null;
-    let isMemoOpen = false;
 
     const dispatch = createEventDispatcher<{
         toggle: { id: string };
@@ -55,7 +53,7 @@
         if (!childText.trim()) return;
         dispatch('add', { parentId: task.id, text: childText.trim() });
         childText = '';
-        isExpanded = true;
+        task.isExpanded = true;
     }
 
     function handleSubEdit(id: string, text: string) {
@@ -89,11 +87,11 @@
     }
 
     function onExpand() {
-        isExpanded = !isExpanded;
+        task.isExpanded = !task.isExpanded;
     }
 
     function toggleMemo() {
-        isMemoOpen = !isMemoOpen;
+        task.isMemoOpen = !task.isMemoOpen;
     }
 </script>
 
@@ -101,7 +99,7 @@
 <TaskItem>
     <svelte:fragment slot="leading">
         <button on:click={onExpand} class="w-6 h-6 rounded border text-xs grid place-content-center hover:bg-gray-200">
-            {isExpanded ? '▾' : '▸'}
+            {task.isExpanded ? '▾' : '▸'}
         </button>
         {#if isEditing}   
             <InlineEditor
@@ -112,7 +110,7 @@
         {:else}
             <span 
                 class:line-through={task.completed} 
-                class:text-gray-400={task.completed || isMemoOpen} 
+                class:text-gray-400={task.completed || task.isMemoOpen} 
                 class="flex-1 min-w-0 cursor-pointer truncate" 
                 use:tapHold={{ duration: 300 }}
                 on:hold={toggleMemo}
@@ -130,7 +128,7 @@
     </svelte:fragment>
 
     <svelte:fragment slot="memo">
-        {#if isMemoOpen}
+        {#if task.isMemoOpen}
             <div
                 class="bg-gray-50 rounded-b-xl shadow-inner p-4 -mt-px w-[calc(22/23*100%)] mx-auto mb-2"
                 in:slide={{ duration: 200 }}
@@ -140,9 +138,17 @@
             </div>
         {/if}
     </svelte:fragment>
+    <svelte:fragment slot="handle">
+        <div
+            class="cursor-grab text-gray-400"
+            data-dnd-handle
+        >
+            ⠿
+        </div>
+    </svelte:fragment>
 
     <svelte:fragment slot="sub-tasks">
-        {#if isExpanded}
+        {#if task.isExpanded}
             <div class="relative pl-10 mt-2" transition:collapse>
                 <div class="absolute top-0 left-6 w-px bg-gray-300 h-full"></div>
                 <div class="flex flex-col gap-1.5">
