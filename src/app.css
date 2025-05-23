@@ -6,7 +6,7 @@
 
 @layer base {
     html, body {
-        @apply bg-yellow-100/80 dark:bg-yellow-100/80 min-h-screen;
+        @apply bg-yellow-100 min-h-screen;
     }
 }
 
