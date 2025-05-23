@@ -163,7 +163,7 @@
                 </div>
                 <div class="relative h-10">
                     <div class="absolute inset-0 flex items-center">
-                        <AddSubButton on:add={onAddChild} class="absolute left-2 top-1/2 -translate-y-1/2 z-10 shadow" />
+                        <AddSubButton on:add={onAddChild} class="absolute left-2 top-1/2 -translate-y-1/2 shadow" />
                         <input
                             type="text"
                             placeholder="Add sub-task"
