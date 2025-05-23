@@ -1,6 +1,7 @@
 import { writable, get } from 'svelte/store';
 import type { Task, PageData } from '../types';
 import { invoke } from '@tauri-apps/api/core';
+import { tick } from 'svelte';
 
 export const activeTaskId = writable<string | null>(null);
 export const historyStack = writable<string[]>([]);
@@ -22,6 +23,7 @@ export async function fetchPage(id: string | null): Promise<PageData> {
 }
 
 export async function navigateTo(id: string) {
+    console.log("navigateTo() is called");
     navDirection.set('forward');
     const current = get(activeTaskId);
     if (current && current !== id) {
@@ -29,6 +31,9 @@ export async function navigateTo(id: string) {
     }
     activeTaskId.set(id);
     await fetchPage(id);
+
+    await tick();
+    document.scrollingElement?.scrollTo({ top: 0, behavior: 'auto' });    
 }
 
 export async function navigateBack() {
@@ -43,6 +48,9 @@ export async function navigateBack() {
         activeTaskId.set(null);
         await fetchPage(null);
     }
+
+    await tick();
+    document.scrollingElement?.scrollTo({ top: 0, behavior: 'auto' });    
 }
 
 async function refreshCurrent() {

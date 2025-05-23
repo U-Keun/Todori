@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Task } from '../types';
-    import { activeTaskId, navDirection, navigateTo, navigateBack, fetchPage, addTask, updateTask, toggleTask, removeTask, reorderChildren } from '$lib/stores/TaskStore';
+    import { activeTaskId, fetchPage, addTask, updateTask, toggleTask, removeTask, reorderChildren } from '$lib/stores/TaskStore';
     import { TaskHeader, TaskNode, AddButton } from '$lib/components';
     import { fly, fade } from 'svelte/transition';
     import { cubicOut } from 'svelte/easing';
@@ -9,8 +9,6 @@
     let parentTitle = 'Project';
     let loading = false;
     let newTitle = '';
-
-    $: direction = $navDirection;
 
     $: if (typeof $activeTaskId !== 'undefined') {
         loading = true;
@@ -81,8 +79,8 @@
 
 </script>
 
-<div class="h-screen max-w-md mx-auto p-4 space-y-4 font-sans h-[90vh]">
-
+<div
+    class="h-screen max-w-md mx-auto p-4 space-y-4 font-sans h-[90vh]">
     {#key $activeTaskId}
         <div 
             in:fly={{ y: 30, duration: 500, easing: cubicOut }}
@@ -94,7 +92,6 @@
                 class="text-lg font-bold"
             />
         </div>
-
         <div 
             in:fade={{ delay: 500, duration: 500}}
             class="mt-[60px] mb-[80px] overflow-y-auto pt-[5px] pb-[80px] w-full max-w-md flex-1"
