@@ -15,22 +15,35 @@
     }
 </script>
 
-<div class="relative" use:clickOutside on:outclick={() => open = false}>
+<div class="dropdown" use:clickOutside on:outclick={() => open = false}>
     <slot name="trigger">
-        <button on:click={toggleMenu} class="w-7 h-7 grid place-content-center text-zinc-500 hover:text-black-500">
-            ⋮
-        </button>
+        <button on:click={toggleMenu} class="trigger-btn">⋮</button>
     </slot>
 
     {#if open}
-        <div class="absolute right-0 mt-1 w-32 bg-white dark:bg-white border rounded shadow-lg z-20" transition:fade>
+        <div class="menu" transition:fade>
             {#each items as item}
                 <button
                     on:click={() => select(item)}
-                    class="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100">
+                    class="menu-item">
                     {item.label}
                 </button>
             {/each}
         </div>
     {/if}
 </div>
+
+<style lang="postcss">
+    .dropdown {
+        @apply relative inline-block;
+    }
+    .trigger-btn {
+        @apply w-7 h-7 grid place-content-center text-zinc-500 hover:text-gray-500;
+    }
+    .menu {
+        @apply absolute right-0 mt-1 w-32 bg-white dark:bg-white border rounded shadow-lg z-20;
+    }
+    .menu-item {
+        @apply block w-full text-left px-4 py-2 text-sm hover:bg-gray-100;
+    }
+</style>
