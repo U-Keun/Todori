@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { Task } from '../types';
     import { createEventDispatcher } from 'svelte';
-    import { ProgressBar, AddSubButton, DropdownMenu, InlineEditor, SubTask, TaskItem } from '$lib/components'
+    import { ProgressBar, AddButton, DropdownMenu, InlineEditor, SubTask, TaskItem } from '$lib/components'
     import { makeMenuItems } from '$lib/helpers/menus';
     import { activeTaskId, navigateTo, navigateBack } from '$lib/stores/TaskStore';
     import { slide } from 'svelte/transition';
@@ -163,7 +163,7 @@
                 </div>
                 <div class="relative h-10">
                     <div class="absolute inset-0 flex items-center">
-                        <AddSubButton on:add={onAddChild} class="absolute left-2 top-1/2 -translate-y-1/2 shadow" />
+                        <AddButton on:add={onAddChild} size="sm" shape="square" class="btn absolute left-2 top-1/2 -translate-y-1/2 shadow" />
                         <input
                             type="text"
                             placeholder="Add sub-task"
