@@ -45,7 +45,7 @@
 
 <TaskItem>
     <svelte:fragment slot="leading">
-        <button class="w-6 h-6 rounded border text-xs grid place-content-center bg-gray-200">
+        <button class="header-btn">
             ▾
         </button>
         {#if isEditing}   
@@ -56,7 +56,7 @@
             />
         {:else}
             <span 
-                class="flex-1 min-w-0 cursor-pointer truncate"
+                class="title-span"
                 class:text-gray-400={isMemoOpen}
                 use:tapHold={{ duration: 300 }}
                 on:hold={toggleMemo}>
@@ -66,10 +66,10 @@
     </svelte:fragment>
 
     <svelte:fragment slot="trailing">
-        <button on:click={onToggle} class="w-7 h-7 rounded-full border grid place-content-center hover:bg-yellow-300">
+        <button on:click={onToggle} class="action-btn">
             ✔
         </button>
-        <button on:click={navigateBack} class="w-7 h-7 rounded-full border grid place-content-center hover:bg-yellow-300">
+        <button on:click={navigateBack} class="action-btn">
             ↖︎
         </button>
     </svelte:fragment>
@@ -77,12 +77,31 @@
     <svelte:fragment slot="memo">
         {#if isMemoOpen}
             <div
-                class="bg-gray-50 rounded-b-xl shadow-inner p-4 -mt-px w-[calc(22/23*100%)] mx-auto mb-2"
+                class="memo-container"
                 in:slide={{ duration: 200 }}
                 out:slide={{ duration: 200 }}
             >
-                <p class="text-sm text-gray-700 mb-0">{title}</p>
+                <p class="memo-text">{title}</p>
             </div>
         {/if}
     </svelte:fragment>
 </TaskItem>
+
+<style lang="postcss">
+    .header-btn {
+        @apply w-6 h-6 rounded border text-xs grid place-content-center bg-gray-200;
+    }
+    .action-btn {
+        @apply w-7 h-7 rounded-full border grid place-content-center hover:bg-yellow-300;
+    }
+    .title-span {
+        @apply flex-1 min-w-0 cursor-pointer truncate;
+    }
+    .memo-container {
+        @apply bg-gray-50 rounded-b-xl shadow-inner p-4 -mt-px mx-auto mb-2;
+        @apply w-[calc(22/23*100%)];
+    }
+    .memo-text {
+        @apply text-sm text-gray-700 mb-0;
+    }
+</style>

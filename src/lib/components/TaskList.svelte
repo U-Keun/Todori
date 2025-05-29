@@ -80,11 +80,11 @@
 </script>
 
 <div
-    class="h-screen max-w-md mx-auto p-4 space-y-4 font-sans h-[90vh]">
+    class="page-container">
     {#key $activeTaskId}
         <div 
             in:fly={{ y: 30, duration: 500, easing: cubicOut }}
-            class="fixed top-4 left-0 right-0 w-full max-w-md mx-auto z-20"
+            class="header-wrapper"
         >
             <TaskHeader
                 activeId={$activeTaskId} 
@@ -94,13 +94,13 @@
         </div>
         <div 
             in:fade={{ delay: 500, duration: 500}}
-            class="mt-[60px] mb-[80px] overflow-y-auto pt-[5px] pb-[80px] w-full max-w-md flex-1"
+            class="content-wrapper"
         >
             {#if loading}
-                <div class="space-y-2 animate-pulse">
-                    <div class="h-6 bg-gray-200 rounded"></div>
-                    <div class="h-6 bg-gray-200 rounded"></div>
-                    <div class="h-6 bg-gray-200 rounded"></div>
+                <div class="loading-skeleton">
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line"></div>
                 </div>
             {:else}
                 <div
@@ -110,7 +110,7 @@
                     }}
                     on:consider={syncOrder}
                     on:finalize={syncOrder}
-                    class="w-full flex flex-col gap-3">
+                    class="task-list">
                     {#each displayedTasks as task, i (task.id)}
                         <div animate:flip={{ duration: 200 }}>
                             <TaskNode
@@ -130,7 +130,7 @@
         </div>
         <div 
             in:fade={{ delay: 1000, duration: 500 }}
-            class="fixed bottom-4 left-0 right-0 w-full max-w-md mx-auto"
+            class="footer-wrapper"
         >
             <form class="relative w-full max-w-md mt-4">
                 <AddButton
@@ -140,8 +140,41 @@
                 <input
                     bind:value={newTitle}
                     placeholder="new task"
-                    class="w-full pl-12 border-0 rounded-xl border pr-4 py-2 bg-white dark:bg-white focus:outline-none shadow" />
+                    class="new-task-input" />
             </form>
         </div>
     {/key}
 </div>
+
+<style lang="postcss">
+  .page-container {
+    @apply h-screen max-w-md mx-auto p-4 space-y-4 font-sans h-[90vh];
+  }
+  .header-wrapper {
+    @apply fixed top-4 inset-x-4 max-w-md mx-auto z-20;
+  }
+  .content-wrapper {
+    @apply mt-[60px] mb-[80px] overflow-y-auto pt-[5px] pb-[80px] w-full max-w-md flex-1;
+  }
+  .loading-skeleton {
+    @apply space-y-2 animate-pulse;
+  }
+  .skeleton-line {
+    @apply h-6 bg-gray-200 rounded;
+  }
+  .task-list {
+    @apply w-full flex flex-col gap-3;
+  }
+  .footer-wrapper {
+    @apply fixed bottom-4 inset-x-4 max-w-md mx-auto z-20;
+  }
+  .footer-form {
+    @apply relative w-full max-w-md mt-4;
+  }
+  .add-btn {
+    @apply absolute inset-y-0 left-2 top-1/2 -translate-y-1/2 z-10;
+  }
+  .new-task-input {
+    @apply w-full box-border pl-12 border-0 rounded-xl border pr-4 py-2 bg-white dark:bg-white focus:outline-none shadow;
+  }
+</style>
